@@ -1,4 +1,3 @@
----@diagnostic disable: duplicate-set-field, undefined-field
 local pui = require("lib.pui")
 
 local option_names = {"Follow Aimbot", "Fakeduck Animation", "Hide Sliders"}
@@ -35,18 +34,10 @@ local viewmodel = {} do
     viewmodel.offset_x = cvar.viewmodel_offset_x;
     viewmodel.offset_y = cvar.viewmodel_offset_y;
     viewmodel.offset_z = cvar.viewmodel_offset_z;
-
-    viewmodel.default = {
-        fov= client.get_cvar("viewmodel_fov"),
-        x= client.get_cvar("viewmodel_offset_x"),
-        y= client.get_cvar("viewmodel_offset_y"),
-        z= client.get_cvar("viewmodel_offset_z")
-    }
-    
     viewmodel.vec = vector(0, 0, 0);
 
     function viewmodel:update()
-        viewmodel.fov:set_raw_float(     menu.fov:get())
+        viewmodel.fov:set_raw_float(     menu.fov:get()   )
         viewmodel.offset_x:set_raw_float(menu.x:get() / 10)
         viewmodel.offset_y:set_raw_float(menu.y:get() / 10)
         viewmodel.offset_z:set_raw_float(menu.z:get() / 10)
@@ -111,11 +102,4 @@ menu.options:set_callback(function ()
             value:set_visible(not options[3])
         end
     end
-end)
-
-defer(function ()
-    viewmodel.fov:set_raw_float(viewmodel.default.fov)
-    viewmodel.offset_x:set_raw_float(viewmodel.default.x)
-    viewmodel.offset_y:set_raw_float(viewmodel.default.y)
-    viewmodel.offset_z:set_raw_float(viewmodel.default.z)
 end)
