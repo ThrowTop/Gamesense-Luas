@@ -1,4 +1,25 @@
-local pui = require("lib.pui")
+local pui = setmetatable({}, {
+    __index = function (self, k) error("Wait a bit till we download PUI library and try again...", 3) end
+}) do
+    local http = http or require("gamesense/http")
+    local file = readfile("pui.lua")
+    if file then local _ _, pui = pcall(require, "pui") end
+
+    print("[pui] Welcome! This script can work better if PUI gets moved to the workshop. Vote here if you want to improve your gaming experience: gamesense.pub/forums/viewtopic.php?id=41761")
+
+    http.get("https://raw.githubusercontent.com/enqdesign/lua/main/gamesense/pui.version", function (success, response)
+        if not success then error("[pui] Failed to find the latest version.") end
+        local version = string.gsub(response.body, "\n", "")
+
+        if not file or string.match(file, "^%-%-(.-)\n") ~= version then
+            http.get("https://raw.githubusercontent.com/enqdesign/lua/main/gamesense/pui.lua", function (success, response)
+                if not success then error("[pui] Failed to download the latest version.") end
+                writefile("pui.lua", string.format("--%s\n", version) .. response.body)
+                client.reload_active_scripts()
+            end)
+        end
+    end)
+end
 
 local option_names = {"Follow Aimbot", "Fakeduck Animation", "Hide Sliders"}
 local options = {false,false,false}
