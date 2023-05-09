@@ -1,31 +1,15 @@
-local pui = setmetatable({}, {
-    __index = function (self, k) error("Wait a bit till we download PUI library and try again...", 3) end
-}) do
-    local http = http or require("gamesense/http")
-    local file = readfile("pui.lua")
-    if file then local _ _, pui = pcall(require, "pui") end
 
-    print("[pui] Welcome! This script can work better if PUI gets moved to the workshop. Vote here if you want to improve your gaming experience: gamesense.pub/forums/viewtopic.php?id=41761")
 
-    http.get("https://raw.githubusercontent.com/enqdesign/lua/main/gamesense/pui.version", function (success, response)
-        if not success then error("[pui] Failed to find the latest version.") end
-        local version = string.gsub(response.body, "\n", "")
-
-        if not file or string.match(file, "^%-%-(.-)\n") ~= version then
-            http.get("https://raw.githubusercontent.com/enqdesign/lua/main/gamesense/pui.lua", function (success, response)
-                if not success then error("[pui] Failed to download the latest version.") end
-                writefile("pui.lua", string.format("--%s\n", version) .. response.body)
-                client.reload_active_scripts()
-            end)
-        end
-    end)
-end
+local pui = require("gamesense/pui") or error("Subscribe to PUI Library | https://gamesense.pub/forums/viewtopic.php?id=41761")
+local ffi = require("ffi")
+local vector = require("vector");
 
 local option_names = {"Follow Aimbot", "Fakeduck Animation", "Hide Sliders"}
 local options = {false,false,false}
 local group = pui.group("Lua", "B")
 local menu = {
     options = group:multiselect("[ \vViewmodel \r] Options", option_names),
+    in_scope = group:checkbox("Viewmodel In scope"),
     fov = group:slider("Viewmodel Fov", 0, 120, 68, true, "", 1, {}),
     x = group:slider("\nViewmodel X", -100, 100, 0, true, "u", 0.1, { [0] = "center" }),
     y = group:slider("\nViewmodel Y", -100, 100, 0, true, "u", 0.1, { [0] = "center" }),
@@ -37,12 +21,22 @@ local menu = {
 
 local fakeduck_ref = pui.reference("RAGE", "Other", "Duck peek assist")
 
-local ffi = require("ffi");
-local vector = require("vector");
-
+--Viewmodel
 local SetAbsAngles = ffi.cast("void(__thiscall*)(void*, const Vector*)", client.find_signature("client.dll", "\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x64\x53\x56\x57\x8B\xF1"));
 local IEntityList = ffi.cast("void***", client.create_interface("client.dll", "VClientEntityList003"));
 local GetClientEntity = ffi.cast("uintptr_t (__thiscall*)(void*, int)", IEntityList[0][3]);
+
+--Show in scope
+local ccsweaponinfo_t = [[
+    struct {
+        char         __pad_0x0000[0x1cd];                   // 0x0000
+        bool         hide_vm_scope;                // 0x01d1
+    }
+]]
+
+local match = client.find_signature("client_panorama.dll", "\x8B\x35\xCC\xCC\xCC\xCC\xFF\x10\x0F\xB7\xC0")
+local weaponsystem_raw = ffi.cast("void****", ffi.cast("char*", match) + 2)[0]
+local get_weapon_info = vtable_thunk(2, ccsweaponinfo_t .. "*(__thiscall*)(void*, unsigned int)")
 
 local shot = {
     time = 0,
@@ -106,6 +100,8 @@ local viewmodel = {} do
     end
 end
 
+--callbacks
+
 client.set_event_callback("aim_fire", function(e) viewmodel:aim_fire(e) end)
 client.set_event_callback("paint", viewmodel.paint)
 client.set_event_callback("override_view", viewmodel.override_view)
@@ -123,4 +119,11 @@ menu.options:set_callback(function ()
             value:set_visible(not options[3])
         end
     end
+end)
+
+client.set_event_callback("run_command", function()
+    local w_id = entity.get_prop(entity.get_player_weapon(entity.get_local_player()), "m_iItemDefinitionIndex")
+    if not weaponsystem_raw or not w_id then return end
+    local res = get_weapon_info(weaponsystem_raw, w_id)
+    res.hide_vm_scope = not menu.in_scope:get()
 end)
