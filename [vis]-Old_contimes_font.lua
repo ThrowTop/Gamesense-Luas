@@ -6,7 +6,7 @@ local console = surface.create_font("Verdana", 12, 400, {0x080})
 
 local custom_logs = {} do
     local logs = {}
-    function custom_logs.count_lines(logs)
+    function custom_logs.count_lines()
         local count = 0
         for _, log in ipairs(logs) do
             if log.newline then count = count + 1 end
@@ -14,7 +14,7 @@ local custom_logs = {} do
         return count
     end
     
-    function custom_logs.remove_line(logs)
+    function custom_logs.remove_line()
         while true do
             local log = table_remove(logs, 1)
             if log.newline then
@@ -27,11 +27,11 @@ local custom_logs = {} do
         local cur_log = { text = e.text, r = e.r, g = e.g, b = e.b, a = e.a, time = globals_curtime(), newline = (e.text:sub(-1) ~= "\0") }
         table_insert(logs, cur_log)
     
-        if custom_logs.count_lines(logs) > 6 then
-            custom_logs.remove_line(logs)
+        if custom_logs.count_lines() > 6 then
+            custom_logs.remove_line()
         end
     end
-    
+
     function custom_logs.paint()
         local x = 8
         local y = 5
