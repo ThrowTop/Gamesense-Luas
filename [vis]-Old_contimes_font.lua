@@ -2,7 +2,7 @@
 local globals_curtime, require, ipairs, math_abs, table_insert, table_remove, ui_get, ui_new_checkbox, ui_reference, ui_set, ui_set_callback, ui_set_enabled, defer = globals.curtime, require, ipairs, math.abs, table.insert, table.remove, ui.get, ui.new_checkbox, ui.reference, ui.set, ui.set_callback, ui.set_enabled, defer
 
 local surface = require("gamesense/surface")
-local console = surface.create_font("Verdana", 12, 400, {0x080})
+local console = surface.create_font("Lucida Console", 10, 400, {0x080})
 
 local custom_logs = {} do
     local logs = {}
