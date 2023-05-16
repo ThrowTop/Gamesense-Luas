@@ -95,7 +95,7 @@ vis_fix(menu.style)
 
 local t = { 0, 0, 0, 0 } -- transparent color
 local rgb_offset = { 0, 0.25, 0.5, 0.75 }
-local fade_alpha = 1
+local fade_alpha = menu_open and 1 or 0
 local key_down = false
 
 client_set_event_callback("paint_ui", function()
