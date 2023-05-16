@@ -70,10 +70,10 @@ local vector = require("vector")
 local tab, cont = "Misc", "Settings"
 local menu = {
     style = ui_new_combobox(tab, cont, "[ \aAAFF00FFBorder Glow Style\aFFFFFFFF ]", { "-", "gamesense", "Manual" }),
-    [1] = ui_new_color_picker(tab, cont, "\n", 255, 255, 255, 255),
-    [2] = ui_new_color_picker(tab, cont, "\n", 255, 255, 255, 255),
-    [3] = ui_new_color_picker(tab, cont, "\n", 255, 255, 255, 255),
-    [4] = ui_new_color_picker(tab, cont, "\n", 255, 255, 255, 255),
+    [1] = ui_new_color_picker(tab, cont, "c1", 255, 255, 255, 255),
+    [2] = ui_new_color_picker(tab, cont, "c2", 255, 255, 255, 255),
+    [3] = ui_new_color_picker(tab, cont, "c3", 255, 255, 255, 255),
+    [4] = ui_new_color_picker(tab, cont, "c4", 255, 255, 255, 255),
     thickness = ui_new_slider(tab, cont, "Thickness", 1, 500, 5, true, "px"),
     speed = ui_new_slider(tab, cont, "Speed", 1, 10, 5, true, "f"),
 }
