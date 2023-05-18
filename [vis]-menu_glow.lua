@@ -1,5 +1,5 @@
 -- local variables for API functions. any changes to the line below will be lost on re-generation
-local client_delay_call, client_set_event_callback, globals_frametime, globals_realtime, math_floor, renderer_gradient, require, ui_get, ui_is_menu_open, ui_menu_position, ui_menu_size, ui_new_color_picker, ui_new_combobox, ui_new_slider, ui_reference, ui_set_callback, ui_set_visible = client.delay_call, client.set_event_callback, globals.frametime, globals.realtime, math.floor, renderer.gradient, require, ui.get, ui.is_menu_open, ui.menu_position, ui.menu_size, ui.new_color_picker, ui.new_combobox, ui.new_slider, ui.reference, ui.set_callback, ui.set_visible
+local client_delay_call, client_set_event_callback, globals_frametime, globals_realtime, math_floor, printf, renderer_gradient, require, ui_get, ui_is_menu_open, ui_menu_position, ui_menu_size, ui_new_color_picker, ui_new_combobox, ui_new_slider, ui_reference, ui_set_callback, ui_set_visible = client.delay_call, client.set_event_callback, globals.frametime, globals.realtime, math.floor, printf, renderer.gradient, require, ui.get, ui.is_menu_open, ui.menu_position, ui.menu_size, ui.new_color_picker, ui.new_combobox, ui.new_slider, ui.reference, ui.set_callback, ui.set_visible
 
 local function lerp_color(c1, c2, t)
     local r = math_floor(c1[1] * (1 - t) + c2[1] * t + 0.5)
@@ -14,20 +14,24 @@ local function lerp(start, vend, time)
     return start + (vend - start) * time
 end
 
+local function print_clr(clr)
+    printf("color(%d, %d, %d, %d)", clr[1], clr[2], clr[3], clr[4])
+end
+
 local function rectangle_gradient(x, y, w, h, precision, t_left, t_right, b_left, b_right)
     if w < h then
-        for i = 0, w - 1, precision do
-            local t = i / w
+        for i = 1, w, precision do
+            local t = (i - 1 + 0.5) / (w - 1 + 0.5)
             local clr = lerp_color(t_left, t_right, t)
             local clr2 = lerp_color(b_left, b_right, t)
-            renderer_gradient(x + i, y, precision, h, clr[1], clr[2], clr[3], clr[4], clr2[1], clr2[2], clr2[3], clr2[4], false)
+            renderer_gradient(x + i - 1, y, precision, h, clr[1], clr[2], clr[3], clr[4], clr2[1], clr2[2], clr2[3], clr2[4], false)
         end
     else
-        for i = 0, h - 1, precision do
-            local t = i / h
+        for i = 1, h, precision do 
+            local t = (i - 1 + 0.5) / (h - 1 + 0.5)
             local clr = lerp_color(t_left, b_left, t)
             local clr2 = lerp_color(t_right, b_right, t)
-            renderer_gradient(x, y + i, w, precision, clr[1], clr[2], clr[3], clr[4], clr2[1], clr2[2], clr2[3], clr2[4], true)
+            renderer_gradient(x, y + i - 1, w, precision, clr[1], clr[2], clr[3], clr[4], clr2[1], clr2[2], clr2[3], clr2[4], true)
         end
     end
 end
@@ -113,8 +117,7 @@ client_set_event_callback("paint_ui", function()
     if not m_key then
         key_down = false
     end
-
-    fade_alpha = lerp(fade_alpha, (menu_open and 1 or 0), globals_frametime() * 1 / 0.05)
+    fade_alpha = lerp(fade_alpha, (menu_open and 1 or 0), globals_frametime() * 20)
     if fade_alpha < 0.05 then return end
 
     local rgb_split_ratio = 1
@@ -137,14 +140,15 @@ client_set_event_callback("paint_ui", function()
     c[3][4] = c[3][4] * fade_alpha
     c[4][4] = c[4][4] * fade_alpha
 
-    local precs = 1                                                                                  --precision precs cus funny
-    rectangle_gradient(p.x, p.y - thickness, s.x, thickness, precs, t, t, c[1], c[2])                --Top
-    rectangle_gradient(p.x, p.y + s.y, s.x, thickness - precs, precs, c[4], c[3], t, t)              -- Bottom
-    rectangle_gradient(p.x - thickness, p.y, thickness, s.y, precs, t, c[1], t, c[4])                -- Left
-    rectangle_gradient(p.x + s.x, p.y, thickness - precs, s.y, precs, c[2], t, c[3], t)              -- Right
 
-    rectangle_gradient(p.x - thickness, p.y - thickness, thickness, thickness, precs, t, t, t, c[1]) --Top left
-    rectangle_gradient(p.x - thickness, p.y + s.y, thickness, thickness, precs, t, c[4], t, t)       -- Bottom Left
-    rectangle_gradient(p.x + s.x, p.y - thickness, thickness, thickness, precs, t, t, c[2], t)       -- Top Right
-    rectangle_gradient(p.x + s.x, p.y + s.y, thickness, thickness, precs, c[3], t, t, t)             -- Bottom Right
-end)
+    local precs = 1                                                                          -- precision precs cus funny
+    rectangle_gradient(p.x, p.y - thickness, s.x, thickness, precs, t, t, c[1], c[2])        -- Top
+    rectangle_gradient(p.x, p.y + s.y, s.x, thickness, precs, c[4], c[3], t, t)              -- Bottom
+    rectangle_gradient(p.x - thickness , p.y, thickness, s.y , precs, t, c[1], t, c[4])      -- Left
+    rectangle_gradient(p.x + s.x, p.y, thickness, s.y, precs, c[2], t, c[3], t)              -- Right
+
+    rectangle_gradient(p.x - thickness  , p.y - thickness   , thickness, thickness, precs, t, t, t, c[1])   --Top left
+    rectangle_gradient(p.x - thickness  , p.y + s.y         , thickness, thickness, precs, t, c[4], t, t)   -- Bottom Left
+    rectangle_gradient(p.x + s.x        , p.y - thickness   , thickness, thickness, precs, t, t, c[2], t)   -- Top Right
+    rectangle_gradient(p.x + s.x        , p.y + s.y         , thickness, thickness, precs, c[3], t, t, t)   -- Bottom Right
+end)        
