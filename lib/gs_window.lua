@@ -8,18 +8,6 @@ local rect_outline = function(x, y, w, h, r, g, b, a, t)
     renderer.rectangle(x + t, y + h - t, w - t, t, r, g, b, a)
 end
 
-local function gs_gradient(x, y, w, a_mul)
-    local alpha = { 255, 128 }
-    local width = math.floor(w / 2)
-    local width2 = x + w - (x + width)
-
-    for i = 1, 2 do
-        local a = alpha[i] * a_mul
-        renderer.gradient(x, y + i, width, 1, 55, 177, 218, a, 201, 84, 192, a, true)
-        renderer.gradient(x + width, y + i, width2, 1, 201, 84, 192, a, 204, 227, 54, a, true)
-    end
-end
-
 local function gs_window(x, y, w, h, alpha, grad)
     local inbounds = { x = x + 6, y = y + (grad and 10 or 6), w = w - 12, h = h - (grad and 16 or 12) }
 
@@ -33,7 +21,16 @@ local function gs_window(x, y, w, h, alpha, grad)
     if grad then
         rect_outline(x + 6, y + 6, w - 12, 4, 12, 12, 12, 255 * alpha, 1)
         renderer.rectangle(x + 7, y + 8, w - 14, 1, 3, 2, 13, 255 * alpha)
-        gs_gradient(x + 7, y + 6, w - 14, alpha)
+
+        local alphas = { 255, 128 }
+        local width = math.floor(w / 2) - 14
+        local width2 = x + w - (x + width) - 14
+    
+        for i = 1, 2 do
+            local a = alphas[i] * alpha
+            renderer.gradient(x + 7, y + i + 6, width, 1, 55, 177, 218, a, 201, 84, 192, a, true)
+            renderer.gradient(x + width + 7, y + i + 6, width2, 1, 201, 84, 192, a, 204, 227, 54, a, true)
+        end
     end
 
     return inbounds
