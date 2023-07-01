@@ -1,4 +1,4 @@
-local http = require "gamesense/http" or "Download http library"
+local http = require("gamesense/http") or error("Download http library", 2)
 
 local cryptos = {
     { name = "bitcoin",  color = "\aCC9900FF", spacing = 4 }, --hardcoded spacing for aligned text
@@ -37,7 +37,7 @@ end
 local crypto_string = table.concat(crypto_names, ",")
 local function refresh()
     http.get("https://api.coingecko.com/api/v3/simple/price?ids=" .. crypto_string .. "&vs_currencies=gbp,usd,eur,sek", function(success, response)
-        ui.set_visible(menu.warning, response.status == 429)
+        ui.set_visible(menu.warning, response.status == 429) -- rate limit
         if not success or response.status ~= 200 then
             return
         end
