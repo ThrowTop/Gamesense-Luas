@@ -1,4 +1,4 @@
-//credits Dawio89 - uid 15366
+-- credits Dawio89 - uid 15366
 
 local IsNewClientAvailable = panorama.loadstring([[
 	var oldClientStatus = NewsAPI.IsNewClientAvailable;
